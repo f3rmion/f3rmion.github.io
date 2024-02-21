@@ -4,7 +4,7 @@ This work was highlighted as [PCCP hot article](https://pubs.rsc.org/en/journals
 
 ## Authors
 
-- ehjc
+- Eike Caldeweyher
 - Jan-Michael Mewes
 - Sebastian Ehlert
 - Stefan Grimme

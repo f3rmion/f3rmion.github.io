@@ -8,7 +8,7 @@
 - Jonathan Becker
 - Estelle Mossou
 - Laura Canãdillas-Delgado
-- ehjc
+- Eike Caldeweyher
 - Stefan Grimme
 - Peter R. Schreiner
 

@@ -2,7 +2,7 @@
 
 ## Authors
 
-- ehjc
+- Eike Caldeweyher
 - Christoph Bauer
 - Ali Soltani Tehrani
 
