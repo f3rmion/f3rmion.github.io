@@ -1,4 +1,4 @@
-# Shortest intermolecular H···H contact
+# Verifying the shortest intermolecular H···H contact
 
 ## Authors
 
