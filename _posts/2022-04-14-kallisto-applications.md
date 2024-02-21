@@ -1,4 +1,4 @@
-# Apply kallisto to real-world problems
+# Solving real-world problems with kallisto
 
 ## Authors
 
