@@ -24,7 +24,7 @@ Successfully installed click-8.1.7 kallisto-1.0.10 numpy-1.26.4 scipy-1.12.0
 
 `kallisto` depends on some scientific Python libraries like _numpy_, _scipy_, and uses _click_ for its CLI.
 
-Next, we verify its installation by requestiong some help.
+Next, we verify its installation by requesting some help.
 This will print out some options and arguments for the CLI.
 
 ```bash
