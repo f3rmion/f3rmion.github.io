@@ -1,6 +1,4 @@
-Hey there, I'm Eike.
-
-Software engineer, quantum chemist, and great vegan cook.
+I'm Eike. Software engineer, quantum chemist, and great vegan cook!
 
 - Currently working as Chemistry Data Tech Lead within the pharmaceutical industry
 - Educated as a quantum chemist, with a postdoc in machine learning
