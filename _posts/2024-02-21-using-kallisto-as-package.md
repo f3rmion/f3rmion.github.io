@@ -1,4 +1,4 @@
-## Calculate efficient quantum-chemical features
+## Efficiently calculate quantum-chemical features
 
 In this blog post, I'd like to describe how you can make use of `kallisto` as a Python package for the efficient calculation of quantum-chemical features.
 Theoretical bits about kallisto are documented in its [GitBook](https://ehjc.gitbook.io/kallisto/) where we mostly describe its application as a command-line interface (CLI).
