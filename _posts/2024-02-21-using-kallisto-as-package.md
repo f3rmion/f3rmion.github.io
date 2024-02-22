@@ -7,13 +7,13 @@ Today, we want to go beyond the CLI-usage and concentrate us on using it as a Py
 Follow the steps below to get a feeling for how to use this package.
 Note that we assume a freshly created virtual environment, e.g., _via_ Conda
 
-```bash
+```
 $ conda create --name kallisto python=3.10
 ```
 
 Activate that virtual environment and continue.
 
-```bash
+```
 $ conda activate kallisto
 ```
 
@@ -21,7 +21,7 @@ $ conda activate kallisto
 
 We install the package via `pip`, which gets the pre-built package from [PyPI](https://pypi.org/project/kallisto/).
 
-```bash
+```
 $ pip install kallisto
 ...
 Installing collected packages: numpy, click, scipy, kallisto
@@ -33,7 +33,7 @@ Successfully installed click-8.1.7 kallisto-1.0.10 numpy-1.26.4 scipy-1.12.0
 Next, we verify its installation by requesting some help.
 This will print out some options and arguments for the CLI.
 
-```bash
+```
 $ kallisto --help
 Usage: kallisto [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
@@ -79,7 +79,7 @@ If this works without errors, we are ready to calculate some features!
 
 Let's start simple by creating an Alanine-Glycine molecule in this `xmol` format.
 
-```bash
+```
 > cat alanine-glycine.xyz
 20
 Alanine-Glycine
