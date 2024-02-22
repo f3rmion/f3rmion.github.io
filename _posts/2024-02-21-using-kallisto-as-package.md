@@ -7,13 +7,13 @@ Today, we want to go beyond the CLI-usage and concentrate us on using it as a Py
 Follow the steps below to get a feeling for how to use this package.
 Note that we assume a freshly created virtual environment, e.g., _via_ Conda
 
-```
+```markdown
 $ conda create --name kallisto python=3.10
 ```
 
 Activate that virtual environment and continue.
 
-```
+```markdown
 $ conda activate kallisto
 ```
 
@@ -21,7 +21,7 @@ $ conda activate kallisto
 
 We install the package via `pip`, which gets the pre-built package from [PyPI](https://pypi.org/project/kallisto/).
 
-```
+```markdown
 $ pip install kallisto
 ...
 Installing collected packages: numpy, click, scipy, kallisto
@@ -33,36 +33,36 @@ Successfully installed click-8.1.7 kallisto-1.0.10 numpy-1.26.4 scipy-1.12.0
 Next, we verify its installation by requesting some help.
 This will print out some options and arguments for the CLI.
 
-```
+```markdown
 $ kallisto --help
 Usage: kallisto [OPTIONS] COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
 
-  kallisto calculates quantum mechanically derived atomic features.
+kallisto calculates quantum mechanically derived atomic features.
 
-  Please check out the documentation (https://ehjc.gitbook.io/kallisto/).
+Please check out the documentation (https://ehjc.gitbook.io/kallisto/).
 
-  Always cite:
+Always cite:
 
-   E. Caldeweyher J. Open Source Softw., 2021, 6, 3050.
-   (https://doi.org/10.21105/joss.03050)
+E. Caldeweyher J. Open Source Softw., 2021, 6, 3050.
+(https://doi.org/10.21105/joss.03050)
 
 Options:
-  --silent
-  --shift INTEGER
-  --help           Show this message and exit.
+--silent
+--shift INTEGER
+--help Show this message and exit.
 
 Commands:
-  alp    Static atomic polarizabilities in Bohr^3.
-  bonds  Get information about covalent bonding partner.
-  cns    Atomic coordination numbers.
-  eeq    Electronegativity equilibration atomic partial charges.
-  exs    Exchange a substrate within a transition metal complex with...
-  lig    Get all substructures (or ligands) that are bound to the center...
-  prox   Atomic proximity shells.
-  rms    Calculate the root mean squared deviation between two structures...
-  sort   Sort input geoemtry according to connectivity.
-  stm    Calculate sterimol descriptors using kallisto van der Waals radii.
-  vdw    Charge-dependent atomic van der Waals radii in Bohr.
+alp Static atomic polarizabilities in Bohr^3.
+bonds Get information about covalent bonding partner.
+cns Atomic coordination numbers.
+eeq Electronegativity equilibration atomic partial charges.
+exs Exchange a substrate within a transition metal complex with...
+lig Get all substructures (or ligands) that are bound to the center...
+prox Atomic proximity shells.
+rms Calculate the root mean squared deviation between two structures...
+sort Sort input geoemtry according to connectivity.
+stm Calculate sterimol descriptors using kallisto van der Waals radii.
+vdw Charge-dependent atomic van der Waals radii in Bohr.
 ```
 
 However, today we want to test it as a package!
@@ -79,30 +79,30 @@ If this works without errors, we are ready to calculate some features!
 
 Let's start simple by creating an Alanine-Glycine molecule in this `xmol` format.
 
-```
+```markdown
 > cat alanine-glycine.xyz
-20
-Alanine-Glycine
-C     2.081440     0.615100    -0.508430
-C     2.742230     1.824030    -1.200820
-N     4.117790     1.799870    -1.190410
-C     4.943570     2.827040    -1.822060
-C     6.440080     2.569360    -1.637600
-O     7.351600     3.252270    -2.069090
-N     0.610100     0.695090    -0.538780
-O     2.095560     2.724940    -1.739670
-O     6.705220     1.463410    -0.897460
-H     0.303080     1.426060     0.103770
-H     0.338420     1.050680    -1.460480
-C     2.488753    -0.593400    -1.198448
-H     2.416500     0.557400     0.532050
-H     4.614100     1.081980    -0.670550
-H     4.699850     3.794460    -1.373720
-H     4.722890     2.844690    -2.894180
-H     7.687400     1.448620    -0.860340
-H     2.029201    -1.457008    -0.719999
-H     2.170233    -0.542411    -2.238576
-H     3.572730    -0.688405    -1.154998
+> 20
+> Alanine-Glycine
+> C 2.081440 0.615100 -0.508430
+> C 2.742230 1.824030 -1.200820
+> N 4.117790 1.799870 -1.190410
+> C 4.943570 2.827040 -1.822060
+> C 6.440080 2.569360 -1.637600
+> O 7.351600 3.252270 -2.069090
+> N 0.610100 0.695090 -0.538780
+> O 2.095560 2.724940 -1.739670
+> O 6.705220 1.463410 -0.897460
+> H 0.303080 1.426060 0.103770
+> H 0.338420 1.050680 -1.460480
+> C 2.488753 -0.593400 -1.198448
+> H 2.416500 0.557400 0.532050
+> H 4.614100 1.081980 -0.670550
+> H 4.699850 3.794460 -1.373720
+> H 4.722890 2.844690 -2.894180
+> H 7.687400 1.448620 -0.860340
+> H 2.029201 -1.457008 -0.719999
+> H 2.170233 -0.542411 -2.238576
+> H 3.572730 -0.688405 -1.154998
 ```
 
 Next, we create a `kallisto` molecule, which gives us a rich ensemble of features through methods.
