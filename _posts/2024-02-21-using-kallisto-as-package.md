@@ -11,6 +11,12 @@ Note that we assume a freshly created virtual environment, e.g., _via_ Conda
 $ conda create --name kallisto python=3.10
 ```
 
+Activate that virtual environment and continue.
+
+```bash
+$ conda activate kallisto
+```
+
 ## Setup `kallisto`
 
 We install the package via `pip`, which gets the pre-built package from [PyPI](https://pypi.org/project/kallisto/).
