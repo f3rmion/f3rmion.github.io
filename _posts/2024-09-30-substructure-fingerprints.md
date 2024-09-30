@@ -93,14 +93,15 @@ print(substructure_fingerprint)
 
 Explanation:
 
-1. Loading SMARTS Patterns: The `json.load()` function is used to read the JSON file.
-2. Creating the FilterCatalog:
+A. Loading SMARTS Patterns: The `json.load()` function is used to read the JSON file.
+
+B. Creating the FilterCatalog:
 
 - An empty `FilterCatalog` object (catalog) is instantiated.
 - For each entry in the _smarts_library_, a SMART matcher object is created and added together with its _pattern_name_ to a `FilterCatalogEntry`.
 - The entry is then added to the `FilterCatalog` via the `AddEntry` method of the catalog.
 
-3. Testing a Molecule:
+C. Testing a Molecule:
 
 - A sample molecule is created from a SMILES string using `Chem.MolFromSmiles()`.
 - The `catalog.GetMatches(mol)` method checks if the molecule contains patterns defined in the custom filter catalog.
