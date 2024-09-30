@@ -1,4 +1,4 @@
-## Data Warehousing in the Pharmaceutical Industry for Chemical Search
+## Chemical Search in Data Warehouses
 
 In the pharmaceutical industry, data is the foundation of innovation, enabling researchers to accelerate drug discovery, optimize synthesis processes, and predict biological activities. Among the various types of data, chemical information holds a critical role. However, handling large volumes of chemical data presents unique challenges, including scalability, searchability, and standardization. This is where data warehousing comes into play.
 
@@ -203,3 +203,13 @@ Benefits of Using LRU Cache:
 
 - Efficient Access: Deserializing from disk can be time-consuming. Caching the `FilterCatalog` ensures efficient access without the repeated I/O operations.
 - Memory Management: By limiting the cache size with `maxsize=1`, you avoid overloading memory, especially if dealing with multiple objects or a large dataset.
+
+## Leveraging custom fingerprints in NoSQL data warehouses
+
+In this blog post, we explored how RDKit can be used to create customized chemical fingerprints for efficient molecule filtering. By building a `FilterCatalog` with custom SMARTS patterns, we can tailor the fingerprinting process to fit specific chemical features of interest. This is particularly valuable when we need to focus on specific substructures or chemical groups in a large dataset.
+
+We also saw how these custom fingerprints can be serialized for future use and cached in memory using an LRU cache, providing both scalability and efficiency in managing chemical data.
+
+One of the key advantages of creating simple, text-based fingerprints is their compatibility with NoSQL data warehouses. In NoSQL systems, where text-based queries are extremely efficient, storing fingerprints as text makes it straightforward to filter out or select molecules based on predefined criteria. This allows researchers to leverage the speed of exact text searches in NoSQL databases—such as MongoDB or Cassandra—for scalable chemical screening.
+
+Using custom fingerprints in this way enables rapid retrieval of relevant molecules without complex and computationally costly substructure searches, making it an ideal solution for integrating cheminformatics into big data platforms. This approach ensures that the data warehouse maintains the performance required for large-scale chemical screening while providing the flexibility to refine and update chemical filters according to the evolving needs of a research project.
