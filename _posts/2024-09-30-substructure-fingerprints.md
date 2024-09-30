@@ -51,6 +51,7 @@ Here's how you can do this for the following example:
 
 ```python
 import json
+
 from rdkit.Chem import FilterCatalog
 from rdkit import Chem
 
@@ -112,3 +113,93 @@ Benefits of This Approach:
 - Customizability: You can update the JSON file with new SMARTS patterns without modifying the core code. However, a new versions of the SMARTS library will result in updates in the data warehouse to keep your records up-to-date.
 - Scalability: This approach scales well, allowing you to build extensive catalogs of chemical filters specific to the needs of different projects (FYI: I tested it for library sizes up to about 500 SMARTS patterns).
 - Readability: Each SMARTS pattern is given a descriptive label, making it easy to understand and manage the chemical filters.
+
+## Serializing the `FilterCatalog`
+
+After creating a custom `FilterCatalog`, it can be beneficial to serialize it for future use without having to recreate it from scratch each time. RDKit provides functionality for serializing and saving filter catalogs, allowing you to store them as binary files. This can be particularly useful when working with large catalogs or when needing to share filters across different projects. You can use Python's pickle module to serialize the FilterCatalog object:
+
+```python
+import json
+import os
+import pickle
+
+from rdkit import Chem
+from rdkit.Chem import FilterCatalog
+
+# Load SMARTS patterns from the JSON file
+with open('chemical_patterns.json', 'r') as file:
+    smarts_library = json.load(file)
+
+# Create a custom FilterCatalog
+catalog = FilterCatalog.FilterCatalog()
+
+# Add each SMARTS pattern to the catalog
+for pattern_name, smarts in smarts_library.items():
+    # Create an RDKit molecule from the SMARTS pattern
+    mol = Chem.MolFromSmarts(smarts)
+    if mol is None:
+        raise ValueError("Invalid SMARTS pattern")
+
+    # Create SMARTS matcher
+    sm = FilterCatalog.SmartsMatcher(mol)
+
+    # Create a FilterCatalogEntry for each SMARTS pattern
+    entry = FilterCatalog.FilterCatalogEntry(pattern_name, sm)
+
+    # Add the entry to the FilterCatalog
+    catalog.AddEntry(entry)
+
+# Serialize FilterCatalog
+data = pickle.dumps(catalog.Serialize())
+with open(os.path.join(os.getcwd(), "filter_catalog.pkl"), "wb") as write_file:
+    write_file.write(data)
+```
+
+## Using LRU Cache to deserialize the `FilterCatalog`
+
+To manage the deserialization of a `FilterCatalog` efficiently, you can use Python's `functools.lru_cache` (`maxsize=1`). This allows you to keep the deserialized catalog in memory for rapid access, while automatically managing the cache size based on usage.
+
+```python
+import pickle
+
+from functools import lru_cache
+
+from rdkit.Chem import FilterCatalog
+
+@lru_cache(maxsize=1)
+def load_filter_catalog(binary_name: str = None) -> FilterCatalog.FilterCatalog:
+    """Load RDKit SMARTS filter catalog for substructure search.
+
+    Returns:
+    RDKit FilterCatalog for SMARTS substructure search.
+    """
+    if not binary_name:
+        raise FileNotFoundError("Binary name is required to load the filter catalog.")
+
+    # Load the serialized filter catalog in file context
+    with open(binary_name, "rb") as binary:
+        catalog = pickle.load(binary)
+
+    # deserialize the filter catalog
+    return FilterCatalog.FilterCatalog(catalog)
+
+# Load the filter catalog using the helper function
+filter_catalog = load_filter_catalog("filter_catalog.pkl")
+```
+
+Explanation:
+
+A. LRU Cache Decorator:
+
+- The `@lru_cache(maxsize=1)` decorator caches the `load_filter_catalog()` function, ensuring that the `FilterCatalog` is loaded from disk only once, after which it stays in memory.
+- The `maxsize=1` parameter ensures that only the most recently used catalog is kept in memory, making this solution memory-efficient while still providing fast access.
+
+B. Loading the FilterCatalog:
+
+- The function `load_filter_catalog` reads the serialized `FilterCatalog` from a binary file (_filter_catalog.pkl_) using pickle.
+- Each time the function is called, if the cached version is already available, it returns it without reloading from the file.
+
+Benefits of Using LRU Cache:
+
+- Efficient Access: Deserializing from disk can be time-consuming. Caching the `FilterCatalog` ensures efficient access without the repeated I/O operations.
+- Memory Management: By limiting the cache size with `maxsize=1`, you avoid overloading memory, especially if dealing with multiple objects or a large dataset.
