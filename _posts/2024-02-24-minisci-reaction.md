@@ -199,7 +199,7 @@ print(models)
 
 The table below lists statistical measures for 41 different machine-learning models:
 
-| Model                         | $R_a$       | $R$         | RMSE    | $t$  |
+| Model                         | R_a         | R           | RMSE    | t    |
 | ----------------------------- | ----------- | ----------- | ------- | ---- |
 | XGBRegressor                  | 0.97        | 0.98        | 0.72    | 0.74 |
 | HistGradientBoostingRegressor | 0.97        | 0.97        | 0.75    | 0.44 |
@@ -247,7 +247,7 @@ The table below lists statistical measures for 41 different machine-learning mod
 The [R measure](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html) is the coefficient of determination, while the adjusted R measure ($R_a$) is a modified version that has been slightly tweaked to determine how reliable the correlation is and how much it is determined by the addition of independent variables:
 
 $$
-\text{R}_a = 1 - (1 - R) \,\frac{n - 1}{n - p - 1}
+R_a = 1 - (1 - R) (n - 1)/(n - p - 1)
 $$
 
 In the equation above, $p$ is the total number of variables in the model and $n$ is the sample size.
