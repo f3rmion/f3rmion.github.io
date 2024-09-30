@@ -246,9 +246,7 @@ The table below lists statistical measures for 41 different machine-learning mod
 
 The [R measure](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html) is the coefficient of determination, while the adjusted R measure (R_a) is a modified version that has been slightly tweaked to determine how reliable the correlation is and how much it is determined by the addition of independent variables:
 
-$$
 R_a = 1 - (1 - R) (n - 1)/(n - p - 1)
-$$
 
 In the equation above, p is the total number of variables in the model and n is the sample size.
 Furthermore, we list the root-mean squares error (RMSE) as well as the training time needed (t) in seconds.
