@@ -1,4 +1,4 @@
-## Model chemical reactivity with machine learning
+## Model Chemical Reactivity with Machine Learning
 
 In this blog post, I would like to present how one can model chemical reactivity _via_ machine learning by exemplifying this for the prediction of regioselectivity determination in radical C-H functionalization of heteroaromatic systems.
 
