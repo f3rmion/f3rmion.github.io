@@ -38,7 +38,7 @@ First, create a JSON file (`chemical_patterns.json`) with the following structur
 
 In this file:
 
-- each key (e.g., "AromaticNitroGroup") is a human-readable label for the pattern.
+- each key (e.g., "AlkeneNonTerminal") is a human-readable label for the pattern.
 - each value is a SMARTS string that represents the chemical substructure.
 
 ### Read the JSON file and create a `FilterCatalog`
