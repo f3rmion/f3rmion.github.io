@@ -244,14 +244,14 @@ The table below lists statistical measures for 41 different machine-learning mod
 | KernelRidge                   | -10.42      | -9.81       | 15.41   | 1.55 |
 | Lars                          | -1645379.70 | -1557037.11 | 5848.83 | 0.04 |
 
-The [R measure](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html) is the coefficient of determination, while the adjusted R measure ($R_a$) is a modified version that has been slightly tweaked to determine how reliable the correlation is and how much it is determined by the addition of independent variables:
+The [R measure](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html) is the coefficient of determination, while the adjusted R measure (R_a) is a modified version that has been slightly tweaked to determine how reliable the correlation is and how much it is determined by the addition of independent variables:
 
 $$
 R_a = 1 - (1 - R) (n - 1)/(n - p - 1)
 $$
 
-In the equation above, $p$ is the total number of variables in the model and $n$ is the sample size.
-Furthermore, we list the root-mean squares error (RMSE) as well as the training time needed ($t$) in seconds.
+In the equation above, p is the total number of variables in the model and n is the sample size.
+Furthermore, we list the root-mean squares error (RMSE) as well as the training time needed (t) in seconds.
 The reference values are calculated barriers of activation in kcal/mol.
 
 We confirm that a trained random forest model performs similarly well to the model that the authors presented in their paper even though we substituted the orders of magnitude more computationally intense DFT calculations by the semi-empirical xTB ones.
