@@ -32,7 +32,7 @@ First, create a JSON file (`chemical_patterns.json`) with the following structur
   "Amide": "[N;$([N;D2]([#6])C(=O)[#6]),$([N;D3]([#6])([#6])C(=O)[#6]),$([N;D1]C(=O)[#6])]",
   "Amine_Primary_Unsaturated_Aliphatic": "[N;X3;!+;!-;!$(N=*);$([N;!$(N~[*;!#6])]);!$(N[*]=[*;O,N]);D1;$([$(*[C]=[C]),$(*[C]#[C]),$(*[C]#[N]);!$(*a)])]",
   "Chloride_Aliphatic": "[Cl;$([Cl][*;$([#6]);!$(*=*)]);$([!$(*[C]=[C]);!$(*[C]#[C]);!$(*[C]#[N]);!$(*a)])]",
-  "PrimaryAlcoholAliphatic": "[O;H1;D1;$(O[C;D2,D1;!$(C[a])]);!$(OC=*);!$(OC#*)]"
+  "PrimaryAlcohol_Aliphatic": "[O;H1;D1;$(O[C;D2,D1;!$(C[a])]);!$(OC=*);!$(OC#*)]"
 }
 ```
 
