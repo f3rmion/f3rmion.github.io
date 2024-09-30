@@ -155,7 +155,7 @@ with open(os.path.join(os.getcwd(), "filter_catalog.pkl"), "wb") as write_file:
     write_file.write(data)
 ```
 
-## Using LRU Cache to deserialize the `FilterCatalog`
+## Using LRU cache to deserialize the `FilterCatalog`
 
 To manage the deserialization of a `FilterCatalog` efficiently, you can use Python's `functools.lru_cache` (`maxsize=1`). This allows you to keep the deserialized catalog in memory for rapid access, while automatically managing the cache size based on usage.
 
