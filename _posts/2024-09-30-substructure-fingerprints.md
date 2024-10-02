@@ -90,6 +90,8 @@ matches_keys.sort()
 substructure_fingerprint = " ".join(matches_keys)
 
 print(substructure_fingerprint)
+# SMILES: C1C=CC=C(/C(/C(=O)NCCCl)=C\OC)C=1
+# Substructure fingerprint: AlkeneNonTerminal Amide Chloride_Aliphatic
 ```
 
 Explanation:
