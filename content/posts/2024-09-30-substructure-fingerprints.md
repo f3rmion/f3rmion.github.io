@@ -55,7 +55,7 @@ Now, let's create a custom `FilterCatalog` using RDKit. We'll read the JSON file
 
 Here's how you can do this for the following example:
 
-![Molecule](https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/_posts/assets/2024-09-30/molecule.png)
+![Molecule](https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/assets/img/molecule.png)
 
 ```python
 import json

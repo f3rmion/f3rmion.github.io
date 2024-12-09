@@ -51,7 +51,7 @@ This is quite a fancy name and it means that we abstract a Hydrogen atom by the 
 This radical then reacts with the heteroaromatic compound and the final product is formed by re-aromatization.
 The following simplified reaction sketch is showing the mechanism in more detail.
 
-![Minisci mechanism](https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/_posts/assets/2024-02-24/minisci-mechanism.png)
+![Minisci mechanism](https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/assets/img/minisci-mechanism.png)
 
 Remember how I said earlier that the outcome of the Minisci reaction is heavily influenced by the nature of the underlying radical and the heteroaromatic system?
 This simply means that the nature of the reactants is somehow responsible for the outcome, which makes sense on an intuitive level.
@@ -314,7 +314,7 @@ plt.savefig("xgb_shap_analysis.png", bbox_inches='tight', dpi=300)
 The generated figure is shown below, where each feature is represented by violin plots and the feature value is represented by gradient colors, where red represents a high feature value and blue a low one.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/_posts/assets/2024-02-24/xgb_shap.png" alt="SHAP analysis" width="500"/>
+<img src="https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/assets/img/xgb_shap.png" alt="SHAP analysis" width="500"/>
 </p>
 
 The complete feature composition is shared in the [GitHub resource](https://github.com/C-H-activation/minisci/blob/main/minisci/helper/features.py).
