@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Data Engineering on f3rmion</title>
+    <link>http://localhost:1313/tags/data-engineering/</link>
+    <description>Recent content in Data Engineering on f3rmion</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 30 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/data-engineering/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Chemical Search in Data Warehouses</title>
+      <link>http://localhost:1313/posts/2024-09-30-substructure-fingerprints/</link>
+      <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024-09-30-substructure-fingerprints/</guid>
+      <description>&lt;p&gt;In the pharmaceutical industry, data is the foundation of innovation, enabling researchers to accelerate drug discovery, optimize synthesis processes, and predict biological activities. Among the various types of data, chemical information holds a critical role. However, handling large volumes of chemical data presents unique challenges, including scalability, searchability, and standardization. This is where data warehousing comes into play.&lt;/p&gt;&#xA;&lt;p&gt;Data warehousing is the practice of integrating and organizing data from diverse sources into a centralized, accessible repository. In the context of the pharmaceutical industry, data warehousing for chemical information means consolidating the structures, properties, and experimental results related to chemical compounds into a single, well-structured platform. By providing a unified view, it becomes easier to query, analyze, and retrieve data, which is crucial for tasks such as lead optimization, structure-activity relationship analysis, and intellectual property management.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

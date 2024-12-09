@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html>
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+        
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: '\\[', right: '\\]', display: true},   
+        {left: '$$', right: '$$', display: true},     
+        {left: '\\(', right: '\\)', display: false},  
+      ],
+      throwOnError : false
+    });
+  });
+</script>
+        
+    </head><head lang="en">
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Model Chemical Reactivity with Machine Learning - f3rmion</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="In this blog post, I would like to present how one can model chemical reactivity _via_ machine learning by exemplifying this for the prediction of regioselectivity determination in radical C-H functionalization of heteroaromatic systems." />
+	<meta property="og:image" content=""/>
+	<meta property="og:url" content="http://localhost:1313/posts/post/">
+  <meta property="og:site_name" content="f3rmion">
+  <meta property="og:title" content="Model Chemical Reactivity with Machine Learning">
+  <meta property="og:description" content="In this blog post, I would like to present how one can model chemical reactivity _via_ machine learning by exemplifying this for the prediction of regioselectivity determination in radical C-H functionalization of heteroaromatic systems.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-01-01T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-01-01T00:00:00+00:00">
+    <meta property="article:tag" content="Chemistry">
+    <meta property="article:tag" content="Machine-Learning">
+    <meta property="article:tag" content="Python">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Model Chemical Reactivity with Machine Learning">
+  <meta name="twitter:description" content="In this blog post, I would like to present how one can model chemical reactivity _via_ machine learning by exemplifying this for the prediction of regioselectivity determination in radical C-H functionalization of heteroaromatic systems.">
+
+	
+        <link href="http://localhost:1313/css/fonts.2c2227b81b1970a03e760aa2e6121cd01f87c88586803cbb282aa224720a765f.css" rel="stylesheet">
+	
+
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="http://localhost:1313/css/main.5cebd7d4fb2b97856af8d32a6def16164fcf7d844e98e236fcb3559655020373.css" />
+
+	
+	
+
+	
+	
+
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="http://localhost:1313/">f3rmion</a>
+	</div>
+	<nav>
+		
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">Model Chemical Reactivity with Machine Learning</h1>
+			<div class="meta">Posted on Jan 1, 2020</div>
+		</div>
+		
+
+		
+
+		<section class="body">
+			<p>In this blog post, I would like to present how one can model chemical reactivity <em>via</em> machine learning by exemplifying this for the prediction of regioselectivity determination in radical C-H functionalization of heteroaromatic systems.</p>
+<hr>
+<h2 id="implementation-and-training-set">Implementation and training set</h2>
+<ul>
+<li><a href="https://github.com/C-H-activation/minisci/tree/main">GitHub repository</a></li>
+</ul>
+<h2 id="mentioned-dependencies">Mentioned dependencies</h2>
+<ul>
+<li><code>lazypredict</code>: machine-learning screening library (Python)</li>
+<li><code>GFN-xTB</code>: semi-empirical tight-binding model (Fortran)</li>
+<li><code>Morfeus</code>: molecular featuriser for machine-learning (Python)</li>
+<li><code>SHAP</code> analysis: game theoretical analysis to check feature importance</li>
+</ul>
+<hr>
+<h2 id="prepare-the-stage">Prepare the stage</h2>
+<p>The basic idea is to create a machine-learning model that enables us to predict where a radical will create a new bond within an aromatic system that contains a heteroatom (atom different than carbon).
+Such a model is of great interest, since it could allow us to gain intuition and more insights into so far unknown territories and could speed up predictions for this kind of reaction.</p>
+<p>The reaction that we model is called the Minisci reaction, which is a named reaction within organic chemistry.
+This reaction enables us to perform a radical substitution to an aromatic compound.
+The reaction was published in 1971 by <a href="https://doi.org/10.1016%2Fs0040-4020%2801%2997768-3">F. Minisci</a>.
+The Minisci reaction often produces a wild mixture of <a href="https://en.wikipedia.org/wiki/Regioisomer">regioisomers</a>, however, modern versions of this reaction allow a wide range of alkygroups to be introduced.</p>
+<p>One complication relies in the fact that the outcome heavily depends both on the radical source and the heteroaromatic system.
+However, since this reaction allows for alkylation of electron deficient systems - which is not possible by <a href="https://en.wikipedia.org/wiki/Friedel%E2%80%93Crafts_reaction">Friedel-Crafts chemistry</a> - it is often used for alkylation chemistry.</p>
+<p>Imagine how a chemist could use their intuition to predict the outcome of a Minisci reaction.
+Next to deep knowledge in the mechanistics of this reaction type they probably also need a decent amount of time to predict the outcome in a proper way.
+What will we do if we want to screen 100 reactions? What if we want to screen 10,000? The poor chemist could either invest a lot of time into this process or we try to automatise it somehow.
+Let&rsquo;s try to get a deeper understanding of this reaction type first.</p>
+<h2 id="the-minisci-reaction-in-more-detail">The Minisci reaction in more detail</h2>
+<p>A free radical is formed by the radical starter within the reaction.
+Often times one uses an acid motif (<code>-COOH</code>) in combination with a silver salt to initiate a so-called oxidative decarboxylation.
+This is quite a fancy name and it means that we abstract a Hydrogen atom by the silver, followed by a release of CO2 as gas to form some kind of radical.
+This radical then reacts with the heteroaromatic compound and the final product is formed by re-aromatization.
+The following simplified reaction sketch is showing the mechanism in more detail.</p>
+<p><img src="https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/_posts/assets/2024-02-24/minisci-mechanism.png" alt="Minisci mechanism"></p>
+<p>Remember how I said earlier that the outcome of the Minisci reaction is heavily influenced by the nature of the underlying radical and the heteroaromatic system?
+This simply means that the nature of the reactants is somehow responsible for the outcome, which makes sense on an intuitive level.
+And indeed, the scientific literature has shown that predictive models based on some chemical descriptors of the reactants is indeed very valuable if combined with, e.g.,regression techniques.</p>
+<p>We call such regression models <em>quantitative structure-activity relationship</em> models since we relate a set of variables (<em>X</em>) to some response variable (<em>Y</em>).
+A very simple example of regression is given by linear regression where we try to predict the value of one variable by another.
+If we include more input variables we can use multi-linear regression to couple multiple independent variables to predict another.
+Hence, we need some function that enables us to create a mapping between our inputs and the output.</p>
+<p>In the case of linear regression, this function is quite easy to find.
+However, if we want to apply a non-linear mapping function we need some way to automatically find this function.
+Luckily, there exist awesome libraries that simplify the process of finding such mappings.
+And in the coming sections, we apply them to obtain the mappings that will enable us to predict outcomes by a set of descriptors based on the reactants.
+However, let&rsquo;s dive first into what we actually want to predict, which brings us to the next important topic - data mining.</p>
+<h2 id="mining-the-literature-for-appropiate-data">Mining the literature for appropiate data</h2>
+<p>If we start working on a project it is always very useful to check out the literature to see who has already published something similar.
+For the prediction of regioselectivity for the Minisci reaction, <a href="https://onlinelibrary.wiley.com/doi/10.1002/anie.202000959">Zhang et al.</a> have published a great work in 2020 in Angewante Chemie.
+In this work, the authors used a machine learning model to predict the <a href="https://en.wikipedia.org/wiki/Transition_state_theory">transition state</a> barrier from computed properties of the isolated reactants.
+In this work, they used machine learning to find the mapping between physical organic features (<em>X</em>) and some theoretically derived barriers (<em>Y</em>).
+You can check their <a href="https://onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1002/anie.202000959&amp;file=anie202000959-sup-0001-misc_information.pdf">supporting information</a> to get a feeling for what kind of features they selected (in total 50 different features).
+They used <a href="https://en.wikipedia.org/wiki/Density_functional_theory">density functional theory</a> (DFT) to compute activation barriers and conveniently provided their data inside a <a href="https://github.com/Masker-Li/ChemSelML/blob/master/DataSet/Canonicalized_SMILES_Reactions_input_data.csv">GitHub</a> repository.</p>
+<p>This is by far the ideal case to start a project, but keep in mind that most of the time mining the literature is <strong>hard work</strong> and is followed by multiple rounds of <a href="https://machinelearningmastery.com/basic-data-cleaning-for-machine-learning/">cleaning the data</a> and <a href="https://machinelearningmastery.com/how-to-use-statistics-to-identify-outliers-in-data/">outlier detection</a>.
+For the sake of brevity, we won&rsquo;t cover those topics in this blog post.
+However, make always sure that the underlying data is meaningful because machine-learning models will follow along the well-known <a href="https://en.wikipedia.org/wiki/Garbage_in,_garbage_out">GIGO</a> principle.</p>
+<h2 id="machine-learning-mapping-functions">Machine-learning mapping functions</h2>
+<p>Let&rsquo;s dig into the essence of what we actually wanted to do.
+Train some machine-learning mapping function to enable us to make some predictions about regioselectiovity.
+But how should we start?
+Which model should we test?
+This is a great question and often times we simply need to test quite a few different ones to get a feeling for which of them is a reasonable choice for the underlying data.
+A rule of thumb for myself is to start with a <a href="https://en.wikipedia.org/wiki/Random_forest">random forest</a> model first and from there work my way through more complex models.</p>
+<p>Recently, a great Python package called <a href="https://lazypredict.readthedocs.io/en/latest/"><code>lazypredict</code></a> was introduced to me that simplifies the screening of models and we use it in this blog post to exemplify model performances.
+Before we jump into model fitting, we need to clarify which features we want to use to describe the reactants.
+In their paper, Zhang et al. used several different feature sets, but the best results were achieved by a random forest model combined with physical organic features (94.2% site selectivity).
+The authors used <a href="https://gaussian.com/">Gaussian</a> to optimise chemical structures and to calculate features.
+Since this software is commercial ($$$), we choose the free and open-source project <a href="https://github.com/grimme-lab/xtb">GFN-xTB</a> as a feature backend, which is a semi-empirical <a href="https://en.wikipedia.org/wiki/Tight_binding">tight binding</a> model.</p>
+<p>This software is written as a command-line interface (CLI) and we could wrap this CLI with output readers and extract the features ourselves.
+However, here we make use of another project that already created a great wrapping Python package, called <a href="https://digital-chemistry-laboratory.github.io/morfeus/">Morfeus</a>.
+This package can be imported as a Python module to simplify the interaction with xTB.
+In the next section, we dive deeper into what features we extract from both reactants.</p>
+<h2 id="designing-a-feature-vector">Designing a feature vector</h2>
+<p>Next, we want to understand how to design a feature vector that is used to train a mapping to a certain reference outcome.
+Morfeus gives us the <code>XTB</code> class that we can use to create an instance that gives us class methods to calculate features with.
+Let&rsquo;s take a water molecule as example and featurise (describe) it.
+We represent water in three-dimensions (<code>xmol</code> format) and the coordinates that we apply are as follows</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-markdown" data-lang="markdown"><span style="display:flex;"><span>$ cat water.xyz
+</span></span><span style="display:flex;"><span>3
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>o 0.00000000000000 -0.06365718653467 -0.00000000010001
+</span></span><span style="display:flex;"><span>h 0.77223547167307 0.50524694437309 0.00000000070010
+</span></span><span style="display:flex;"><span>h -0.77223547197311 0.50524694397304 0.00000000030004
+</span></span></code></pre></div><p>We use this molecule and calculate a few physical organic features using xTB.
+Note that you need to have <a href="https://xtb-docs.readthedocs.io/en/latest/setup.html">xTB installed</a> on your system to follow along - you can easily install xTB <em>via</em> Conda.
+Now we build a small script that reads the water coordinates and we calculate features like atomic <a href="https://en.wikipedia.org/wiki/Partial_charge">partial charges</a>, <a href="https://en.wikipedia.org/wiki/Fukui_function">Fukui indices</a>, and electonical properties like the highest-occupied molecular orbital (HOMO) or the lowest-unoccupied molecular orbital (LUMO) as obtained from <a href="https://en.wikipedia.org/wiki/Molecular_orbital_theory">molecular-orbital theory</a>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> morfeus <span style="color:#f92672">import</span> read_xyz
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> morfeus <span style="color:#f92672">import</span> XTB
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get elements and coordinates from xmol file</span>
+</span></span><span style="display:flex;"><span>water_elements, water_coordinates <span style="color:#f92672">=</span> read_xyz(<span style="color:#e6db74">&#34;water.xyz&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># build XTB instance for a neutral water molecule</span>
+</span></span><span style="display:flex;"><span>molecular_charge <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>water_xtb <span style="color:#f92672">=</span> XTB(
+</span></span><span style="display:flex;"><span>    elements<span style="color:#f92672">=</span>water_elements,
+</span></span><span style="display:flex;"><span>    coordinates<span style="color:#f92672">=</span>water_coordinates,
+</span></span><span style="display:flex;"><span>    charge<span style="color:#f92672">=</span>molecular_charge,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># partial charges: {1: -0.5647323737329832, 2: 0.28236618686659615, 3: 0.28236618686638876}</span>
+</span></span><span style="display:flex;"><span>water_charges <span style="color:#f92672">=</span> water_xtb<span style="color:#f92672">.</span>get_charges()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># electrophilicity fukui: {1: 0.22775662534546415, 2: 0.38612168731709295, 3: 0.3861216873374471}</span>
+</span></span><span style="display:flex;"><span>water_electrophilicity_fukui <span style="color:#f92672">=</span> water_xtb<span style="color:#f92672">.</span>get_fukui(<span style="color:#e6db74">&#34;electrophilicity&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># nucleophilicity fukui: {1: 0.5973889157529119, 2: 0.2013055421228951, 3: 0.20130554212419272}</span>
+</span></span><span style="display:flex;"><span>water_nucleophilicity_fukui <span style="color:#f92672">=</span> water_xtb<span style="color:#f92672">.</span>get_fukui(<span style="color:#e6db74">&#34;nucleophilicity&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ionisation potential: 13.44750237224477</span>
+</span></span><span style="display:flex;"><span>water_ip <span style="color:#f92672">=</span> water_xtb<span style="color:#f92672">.</span>get_ip(corrected<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># electron affinity: -6.6728543165601835</span>
+</span></span><span style="display:flex;"><span>water_ea <span style="color:#f92672">=</span> water_xtb<span style="color:#f92672">.</span>get_ea()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chemical potential (mu): -10.060178344402477</span>
+</span></span><span style="display:flex;"><span>water_mu <span style="color:#f92672">=</span> (water_ea <span style="color:#f92672">-</span> water_ip) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># chemical hardness (eta): 20.120356688804954</span>
+</span></span><span style="display:flex;"><span>water_eta <span style="color:#f92672">=</span> water_ip <span style="color:#f92672">-</span> water_ea
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># homo energy: -0.4463812902311759</span>
+</span></span><span style="display:flex;"><span>water_homo <span style="color:#f92672">=</span> water_xtb<span style="color:#f92672">.</span>get_homo()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># lumo energy: 0.08246796400242422</span>
+</span></span><span style="display:flex;"><span>water_lumo <span style="color:#f92672">=</span> water_xtb<span style="color:#f92672">.</span>get_lumo()
+</span></span></code></pre></div><p>See the feature selection section further below to get more insights about how to choose features by exploiting a game theoretical approach that explains the outcome of a machine-learning model based on each feature&rsquo;s contribution to the model.
+In the next section, we want to talk about model selection to check which machine-learning model is performing reasonably for the problem of interest.</p>
+<h2 id="machine-learning-model-selection">Machine-learning model selection</h2>
+<p>We take the <a href="">final training set</a> to test <code>lazypredict</code>&rsquo;s ability to quickly screen different machine-learning models.
+We use the following code snippet for the screening:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.utils <span style="color:#f92672">import</span> shuffle
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> lazypredict.Supervised <span style="color:#f92672">import</span> LazyRegressor
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#34;X_physchem.csv&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># length of the feature vector</span>
+</span></span><span style="display:flex;"><span>feature_length <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># extract training data: X</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># extract reference values (column &#34;dg_ts&#34;): Y</span>
+</span></span><span style="display:flex;"><span>X_df <span style="color:#f92672">=</span> df<span style="color:#f92672">.</span>iloc[<span style="color:#ae81ff">0</span>: , <span style="color:#ae81ff">1</span>:feature_length <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>y_df <span style="color:#f92672">=</span> df[<span style="color:#e6db74">&#34;dg_ts&#34;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># randomly shuffle data</span>
+</span></span><span style="display:flex;"><span>X, y <span style="color:#f92672">=</span> shuffle(X_df, y_df, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">13</span>)
+</span></span><span style="display:flex;"><span>X <span style="color:#f92672">=</span> X<span style="color:#f92672">.</span>astype(np<span style="color:#f92672">.</span>float32)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># train machine-learning models</span>
+</span></span><span style="display:flex;"><span>offset <span style="color:#f92672">=</span> int(X<span style="color:#f92672">.</span>shape[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.9</span>)
+</span></span><span style="display:flex;"><span>X_train, y_train <span style="color:#f92672">=</span> X[:offset], y[:offset]
+</span></span><span style="display:flex;"><span>X_test, y_test <span style="color:#f92672">=</span> X[offset:], y[offset:]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># perform regression</span>
+</span></span><span style="display:flex;"><span>reg <span style="color:#f92672">=</span> LazyRegressor(verbose<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, ignore_warnings<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>, custom_metric<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>)
+</span></span><span style="display:flex;"><span>models, predictions <span style="color:#f92672">=</span> reg<span style="color:#f92672">.</span>fit(X_train, X_test, y_train, y_test)
+</span></span><span style="display:flex;"><span>print(models)
+</span></span></code></pre></div><p>The table below lists statistical measures for 41 different machine-learning models:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Model</th>
+          <th>R_a</th>
+          <th>R</th>
+          <th>RMSE</th>
+          <th>t</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>XGBRegressor</td>
+          <td>0.97</td>
+          <td>0.98</td>
+          <td>0.72</td>
+          <td>0.74</td>
+      </tr>
+      <tr>
+          <td>HistGradientBoostingRegressor</td>
+          <td>0.97</td>
+          <td>0.97</td>
+          <td>0.75</td>
+          <td>0.44</td>
+      </tr>
+      <tr>
+          <td>LGBMRegressor</td>
+          <td>0.97</td>
+          <td>0.97</td>
+          <td>0.75</td>
+          <td>0.28</td>
+      </tr>
+      <tr>
+          <td>ExtraTreesRegressor</td>
+          <td>0.95</td>
+          <td>0.96</td>
+          <td>0.99</td>
+          <td>3.13</td>
+      </tr>
+      <tr>
+          <td>RandomForestRegressor</td>
+          <td>0.95</td>
+          <td>0.95</td>
+          <td>1.05</td>
+          <td>8.95</td>
+      </tr>
+      <tr>
+          <td>BaggingRegressor</td>
+          <td>0.94</td>
+          <td>0.94</td>
+          <td>1.14</td>
+          <td>0.72</td>
+      </tr>
+      <tr>
+          <td>MLPRegressor</td>
+          <td>0.92</td>
+          <td>0.93</td>
+          <td>1.25</td>
+          <td>4.80</td>
+      </tr>
+      <tr>
+          <td>DecisionTreeRegressor</td>
+          <td>0.91</td>
+          <td>0.91</td>
+          <td>1.38</td>
+          <td>0.13</td>
+      </tr>
+      <tr>
+          <td>GradientBoostingRegressor</td>
+          <td>0.90</td>
+          <td>0.90</td>
+          <td>1.45</td>
+          <td>1.80</td>
+      </tr>
+      <tr>
+          <td>ExtraTreeRegressor</td>
+          <td>0.86</td>
+          <td>0.87</td>
+          <td>1.68</td>
+          <td>0.06</td>
+      </tr>
+      <tr>
+          <td>SVR</td>
+          <td>0.86</td>
+          <td>0.87</td>
+          <td>1.70</td>
+          <td>3.03</td>
+      </tr>
+      <tr>
+          <td>NuSVR</td>
+          <td>0.86</td>
+          <td>0.87</td>
+          <td>1.72</td>
+          <td>2.56</td>
+      </tr>
+      <tr>
+          <td>KNeighborsRegressor</td>
+          <td>0.85</td>
+          <td>0.86</td>
+          <td>1.74</td>
+          <td>0.09</td>
+      </tr>
+      <tr>
+          <td>AdaBoostRegressor</td>
+          <td>0.75</td>
+          <td>0.76</td>
+          <td>2.30</td>
+          <td>0.70</td>
+      </tr>
+      <tr>
+          <td>TransformedTargetRegressor</td>
+          <td>0.72</td>
+          <td>0.73</td>
+          <td>2.43</td>
+          <td>0.03</td>
+      </tr>
+      <tr>
+          <td>LinearRegression</td>
+          <td>0.72</td>
+          <td>0.73</td>
+          <td>2.43</td>
+          <td>0.02</td>
+      </tr>
+      <tr>
+          <td>BayesianRidge</td>
+          <td>0.72</td>
+          <td>0.73</td>
+          <td>2.43</td>
+          <td>0.06</td>
+      </tr>
+      <tr>
+          <td>RidgeCV</td>
+          <td>0.71</td>
+          <td>0.72</td>
+          <td>2.46</td>
+          <td>0.15</td>
+      </tr>
+      <tr>
+          <td>Ridge</td>
+          <td>0.69</td>
+          <td>0.71</td>
+          <td>2.54</td>
+          <td>0.02</td>
+      </tr>
+      <tr>
+          <td>HuberRegressor</td>
+          <td>0.68</td>
+          <td>0.70</td>
+          <td>2.56</td>
+          <td>0.19</td>
+      </tr>
+      <tr>
+          <td>LinearSVR</td>
+          <td>0.68</td>
+          <td>0.70</td>
+          <td>2.58</td>
+          <td>0.18</td>
+      </tr>
+      <tr>
+          <td>LassoCV</td>
+          <td>0.68</td>
+          <td>0.70</td>
+          <td>2.59</td>
+          <td>0.58</td>
+      </tr>
+      <tr>
+          <td>ElasticNetCV</td>
+          <td>0.66</td>
+          <td>0.68</td>
+          <td>2.66</td>
+          <td>0.31</td>
+      </tr>
+      <tr>
+          <td>SGDRegressor</td>
+          <td>0.66</td>
+          <td>0.68</td>
+          <td>2.67</td>
+          <td>0.23</td>
+      </tr>
+      <tr>
+          <td>RANSACRegressor</td>
+          <td>0.65</td>
+          <td>0.67</td>
+          <td>2.71</td>
+          <td>0.35</td>
+      </tr>
+      <tr>
+          <td>PoissonRegressor</td>
+          <td>0.58</td>
+          <td>0.61</td>
+          <td>2.94</td>
+          <td>0.06</td>
+      </tr>
+      <tr>
+          <td>OrthogonalMatchingPursuitCV</td>
+          <td>0.47</td>
+          <td>0.50</td>
+          <td>3.33</td>
+          <td>0.21</td>
+      </tr>
+      <tr>
+          <td>LassoLarsIC</td>
+          <td>0.46</td>
+          <td>0.49</td>
+          <td>3.35</td>
+          <td>0.04</td>
+      </tr>
+      <tr>
+          <td>GammaRegressor</td>
+          <td>0.40</td>
+          <td>0.43</td>
+          <td>3.53</td>
+          <td>0.05</td>
+      </tr>
+      <tr>
+          <td>TweedieRegressor</td>
+          <td>0.40</td>
+          <td>0.43</td>
+          <td>3.54</td>
+          <td>0.04</td>
+      </tr>
+      <tr>
+          <td>LassoLarsCV</td>
+          <td>0.34</td>
+          <td>0.38</td>
+          <td>3.70</td>
+          <td>0.07</td>
+      </tr>
+      <tr>
+          <td>OrthogonalMatchingPursuit</td>
+          <td>0.33</td>
+          <td>0.36</td>
+          <td>3.74</td>
+          <td>0.03</td>
+      </tr>
+      <tr>
+          <td>LarsCV</td>
+          <td>0.31</td>
+          <td>0.34</td>
+          <td>3.80</td>
+          <td>0.12</td>
+      </tr>
+      <tr>
+          <td>ElasticNet</td>
+          <td>0.28</td>
+          <td>0.32</td>
+          <td>3.88</td>
+          <td>0.02</td>
+      </tr>
+      <tr>
+          <td>PassiveAggressiveRegressor</td>
+          <td>0.18</td>
+          <td>0.23</td>
+          <td>4.12</td>
+          <td>0.09</td>
+      </tr>
+      <tr>
+          <td>Lasso</td>
+          <td>0.17</td>
+          <td>0.21</td>
+          <td>4.16</td>
+          <td>0.02</td>
+      </tr>
+      <tr>
+          <td>LassoLars</td>
+          <td>0.17</td>
+          <td>0.21</td>
+          <td>4.16</td>
+          <td>0.03</td>
+      </tr>
+      <tr>
+          <td>QuantileRegressor</td>
+          <td>-0.06</td>
+          <td>-0.00</td>
+          <td>4.69</td>
+          <td>1.73</td>
+      </tr>
+      <tr>
+          <td>DummyRegressor</td>
+          <td>-0.06</td>
+          <td>-0.00</td>
+          <td>4.69</td>
+          <td>0.02</td>
+      </tr>
+      <tr>
+          <td>GaussianProcessRegressor</td>
+          <td>-0.17</td>
+          <td>-0.11</td>
+          <td>4.93</td>
+          <td>4.04</td>
+      </tr>
+      <tr>
+          <td>KernelRidge</td>
+          <td>-10.42</td>
+          <td>-9.81</td>
+          <td>15.41</td>
+          <td>1.55</td>
+      </tr>
+      <tr>
+          <td>Lars</td>
+          <td>-1645379.70</td>
+          <td>-1557037.11</td>
+          <td>5848.83</td>
+          <td>0.04</td>
+      </tr>
+  </tbody>
+</table>
+<p>The <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html">R measure</a> is the coefficient of determination, while the adjusted R measure (\(R_a\)) is a modified version that has been slightly tweaked to determine how reliable the correlation is and how much it is determined by the addition of independent variables:</p>
+\[
+R_a = 1 - \frac{(1 - R)\times(n - 1)}{n - p - 1}
+\]<p>In the equation above, p is the total number of variables in the model and n is the sample size.
+Furthermore, we list the root-mean squares error (RMSE) as well as the training time needed (t) in seconds.
+The reference values are calculated barriers of activation in kcal/mol.</p>
+<p>We confirm that a trained random forest model performs similarly well to the model that the authors presented in their paper even though we substituted the orders of magnitude more computationally intense DFT calculations by the semi-empirical xTB ones.
+Furthermore, we see that gradient boosted regression models outperform a random forest model.</p>
+<h2 id="feature-selection">Feature selection</h2>
+<p><a href="https://shap.readthedocs.io/en/latest/">Shapley additive explanations</a> analysis is used for testing the feature importance.
+This analysis is based on a game theoretical approach that explains the outputs of a machine-learning model based on the feeded features (see their <a href="https://shap.readthedocs.io/en/latest/">papers</a> for more information).</p>
+<p>We use the <code>XGBRegressor</code> machine-learning model as example since it performed the best in our analysis earlier.
+Note that feature selection and machine-learning accuracy determination are steps that need to be repeated.
+In general, one wants to find a good feature coverage to express most of the example in the training set with confidence.
+There is kind of a cycle of optimization that one enters until the accuracy converges with a set of features that is then used to create the final model.</p>
+<p>The code below trains the <code>XGBRegressor</code> model and outputs SHAP values:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> matplotlib.pyplot <span style="color:#66d9ef">as</span> plt
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> shap
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> xgboost
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># create Pandas data frame</span>
+</span></span><span style="display:flex;"><span>df <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#39;X_physchem.csv&#39;</span>)
+</span></span><span style="display:flex;"><span>length <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>X_df <span style="color:#f92672">=</span> df<span style="color:#f92672">.</span>iloc[: , <span style="color:#ae81ff">1</span>:length<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># names of feature columns (in order wrt the csv)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># c: compound (p: cation, m: anion)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># r: radical (p: cation, m: anion)</span>
+</span></span><span style="display:flex;"><span>feature_names <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;q_c&#39;</span>, <span style="color:#e6db74">&#39;q_cp&#39;</span>, <span style="color:#e6db74">&#39;q_cm&#39;</span>, <span style="color:#e6db74">&#39;c_ip&#39;</span>, <span style="color:#e6db74">&#39;c_ea&#39;</span>, <span style="color:#e6db74">&#39;c_homo&#39;</span>, <span style="color:#e6db74">&#39;c_lumo&#39;</span>, <span style="color:#e6db74">&#39;c_e&#39;</span>, <span style="color:#e6db74">&#39;c_n&#39;</span>, <span style="color:#e6db74">&#39;c_le&#39;</span>, <span style="color:#e6db74">&#39;c_ln&#39;</span>, <span style="color:#e6db74">&#39;c_cp&#39;</span>, <span style="color:#e6db74">&#39;c_ch&#39;</span>, <span style="color:#e6db74">&#39;c_fbv3&#39;</span>, <span style="color:#e6db74">&#39;c_fbv4&#39;</span>, <span style="color:#e6db74">&#39;c_fbv5&#39;</span>, <span style="color:#e6db74">&#39;q_r&#39;</span>, <span style="color:#e6db74">&#39;q_rp&#39;</span>, <span style="color:#e6db74">&#39;q_rn&#39;</span>, <span style="color:#e6db74">&#39;r_ip&#39;</span>, <span style="color:#e6db74">&#39;r_ea&#39;</span>, <span style="color:#e6db74">&#39;r_homo&#39;</span>, <span style="color:#e6db74">&#39;r_lumo&#39;</span>, <span style="color:#e6db74">&#39;r_e&#39;</span>, <span style="color:#e6db74">&#39;r_n&#39;</span>, <span style="color:#e6db74">&#39;r_le&#39;</span>, <span style="color:#e6db74">&#39;r_ln&#39;</span>, <span style="color:#e6db74">&#39;r_cp&#39;</span>, <span style="color:#e6db74">&#39;r_ch&#39;</span>, <span style="color:#e6db74">&#39;r_fbv3&#39;</span>, <span style="color:#e6db74">&#39;r_fbv4&#39;</span>, <span style="color:#e6db74">&#39;r_fbv5&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># name of reference activation energy in kcal/mol</span>
+</span></span><span style="display:flex;"><span>y_df <span style="color:#f92672">=</span> df[<span style="color:#e6db74">&#39;dg_ts&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>X <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(X_df)
+</span></span><span style="display:flex;"><span>y <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>array(y_df)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># define machine-learning model and train it</span>
+</span></span><span style="display:flex;"><span>xgb <span style="color:#f92672">=</span> xgboost<span style="color:#f92672">.</span>XGBRegressor(n_estimators<span style="color:#f92672">=</span><span style="color:#ae81ff">300</span>, max_depth<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>, learning_rate<span style="color:#f92672">=</span><span style="color:#ae81ff">0.1</span>, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>xgb<span style="color:#f92672">.</span>fit(X, y)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SHAP analysis</span>
+</span></span><span style="display:flex;"><span>shap_explainer <span style="color:#f92672">=</span> shap<span style="color:#f92672">.</span>TreeExplainer(xgb)
+</span></span><span style="display:flex;"><span>shap_values <span style="color:#f92672">=</span> shap_explainer<span style="color:#f92672">.</span>shap_values(X)
+</span></span><span style="display:flex;"><span>plt <span style="color:#f92672">=</span> plt<span style="color:#f92672">.</span>figure()
+</span></span><span style="display:flex;"><span>shap<span style="color:#f92672">.</span>summary_plot(shap_values, X, feature_names<span style="color:#f92672">=</span>feature_names, plot_type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;layered_violin&#34;</span>, color<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;coolwarm&#34;</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#f92672">.</span>savefig(<span style="color:#e6db74">&#34;xgb_shap_analysis.png&#34;</span>, bbox_inches<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tight&#39;</span>, dpi<span style="color:#f92672">=</span><span style="color:#ae81ff">300</span>)
+</span></span></code></pre></div><p>The generated figure is shown below, where each feature is represented by violin plots and the feature value is represented by gradient colors, where red represents a high feature value and blue a low one.</p>
+<!-- raw HTML omitted -->
+<p>The complete feature composition is shared in the <a href="https://github.com/C-H-activation/minisci/blob/main/minisci/helper/features.py">GitHub resource</a>.</p>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			<nav class="nav tags">
+				<ul class="tags">
+					
+					<li><a href="/tags/chemistry">chemistry</a></li>
+					
+					<li><a href="/tags/machine-learning">machine-learning</a></li>
+					
+					<li><a href="/tags/python">python</a></li>
+					
+				</ul>
+			</nav>
+			
+			
+		</div>
+		</article>
+</main>
+<footer>
+  <div style="display:flex"></div>
+  <div class="footer-info">
+    2024  <a
+      href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+  </div>
+</footer>
+</div>
+    </body>
+</html>

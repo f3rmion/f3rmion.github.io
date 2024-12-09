@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+        
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: '\\[', right: '\\]', display: true},   
+        {left: '$$', right: '$$', display: true},     
+        {left: '\\(', right: '\\)', display: false},  
+      ],
+      throwOnError : false
+    });
+  });
+</script>
+        
+    </head><head lang="en">
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Chemical Search in Data Warehouses - f3rmion</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Learn how to create custom chemical fingerprints using RDKit for efficient molecule filtering in data warehouses." />
+	<meta property="og:image" content=""/>
+	<meta property="og:url" content="http://localhost:1313/posts/2024-09-30-substructure-fingerprints/">
+  <meta property="og:site_name" content="f3rmion">
+  <meta property="og:title" content="Chemical Search in Data Warehouses">
+  <meta property="og:description" content="Learn how to create custom chemical fingerprints using RDKit for efficient molecule filtering in data warehouses.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-09-30T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-09-30T00:00:00+00:00">
+    <meta property="article:tag" content="Chemistry">
+    <meta property="article:tag" content="Data Engineering">
+    <meta property="article:tag" content="Python">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Chemical Search in Data Warehouses">
+  <meta name="twitter:description" content="Learn how to create custom chemical fingerprints using RDKit for efficient molecule filtering in data warehouses.">
+
+	
+        <link href="http://localhost:1313/css/fonts.2c2227b81b1970a03e760aa2e6121cd01f87c88586803cbb282aa224720a765f.css" rel="stylesheet">
+	
+
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="http://localhost:1313/css/main.5cebd7d4fb2b97856af8d32a6def16164fcf7d844e98e236fcb3559655020373.css" />
+
+	
+	
+
+	
+	
+
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="http://localhost:1313/">f3rmion</a>
+	</div>
+	<nav>
+		
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">Chemical Search in Data Warehouses</h1>
+			<div class="meta">Posted on Sep 30, 2024</div>
+		</div>
+		
+
+		
+
+		<section class="body">
+			<p>In the pharmaceutical industry, data is the foundation of innovation, enabling researchers to accelerate drug discovery, optimize synthesis processes, and predict biological activities. Among the various types of data, chemical information holds a critical role. However, handling large volumes of chemical data presents unique challenges, including scalability, searchability, and standardization. This is where data warehousing comes into play.</p>
+<p>Data warehousing is the practice of integrating and organizing data from diverse sources into a centralized, accessible repository. In the context of the pharmaceutical industry, data warehousing for chemical information means consolidating the structures, properties, and experimental results related to chemical compounds into a single, well-structured platform. By providing a unified view, it becomes easier to query, analyze, and retrieve data, which is crucial for tasks such as lead optimization, structure-activity relationship analysis, and intellectual property management.</p>
+<p>Effective data warehousing provides pharmaceutical researchers with fast and scalable access to structured chemical information, thereby enhancing the searchability of chemical compounds. Chemical searches often involve more than just exact match queries; they require substructure searches, similarity searches, and custom filtering based on molecular properties. To meet these needs, chemical fingerprints—bitstrings that encode structural information of a molecule—are employed as key indexing tools in data warehouses.</p>
+<p>In this post, we’ll explore how customized chemical fingerprints, created using RDKit, can significantly improve the efficiency of chemical search processes within data warehouses. By tailoring fingerprint generation to the specific requirements of a project, researchers can optimize search results, enhance computational efficiency, and ultimately make more informed decisions in drug discovery.</p>
+<h2 id="rdkit-and-molecular-fingerprints">RDKit and molecular fingerprints</h2>
+<p>RDKit is an open-source toolkit for cheminformatics, widely used in the pharmaceutical industry for tasks like molecular modeling, property prediction, and chemical information retrieval. One of RDKit’s core features is the generation of molecular fingerprints—compact representations of molecular structures in the form of bitstrings. These fingerprints are used to encode the presence or absence of various chemical features or substructures, enabling efficient comparison of molecules.</p>
+<p>In a typical fingerprinting process, RDKit analyzes the structure of a molecule and maps it to a binary vector, where each bit represents a specific substructure or chemical property. These fingerprints can be tailored for different types of chemical searches, such as similarity searching, which identifies molecules with related features, or substructure searching, which finds compounds that contain a particular fragment.</p>
+<p>While RDKit offers a variety of pre-built fingerprint algorithms, such as Morgan, MACCS, and Atom Pair, customizing these fingerprints can offer significant advantages. By defining your own library of substructures, you can create a simple text-based fingerprint that highlights the presence of user-defined chemical patterns, allowing you to filter molecules based on specific features relevant to your research.</p>
+<h2 id="creating-a-custom-filtercatalog-using-smarts-patterns">Creating a custom <code>FilterCatalog</code> using SMARTS patterns</h2>
+<p>To create a custom filtering system for molecules using RDKit&rsquo;s <code>FilterCatalog</code>, you can define your own set of chemical substructures using SMARTS patterns and store them in a JSON file. This allows for easy customization and scalability, as you can modify the library of SMARTS patterns to suit specific project needs without hardcoding them.</p>
+<p>In this example, we&rsquo;ll create a <code>FilterCatalog</code> from a JSON file that contains a dictionary where each key is a descriptive name for a chemical pattern, and each value is a corresponding SMARTS string.</p>
+<h3 id="prepare-the-json-file-with-smarts-patterns">Prepare the JSON file with SMARTS Patterns</h3>
+<p>First, create a JSON file (<code>chemical_patterns.json</code>) with the following structure:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;AlkeneNonTerminal&#34;</span>: <span style="color:#e6db74">&#34;[C;D2;$(C([*;!$(*=*)])=C[*;!$(*=*)])]&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;Amide&#34;</span>: <span style="color:#e6db74">&#34;[N;$([N;D2]([#6])C(=O)[#6]),$([N;D3]([#6])([#6])C(=O)[#6]),$([N;D1]C(=O)[#6])]&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;Amine_Primary_Unsaturated_Aliphatic&#34;</span>: <span style="color:#e6db74">&#34;[N;X3;!+;!-;!$(N=*);$([N;!$(N~[*;!#6])]);!$(N[*]=[*;O,N]);D1;$([$(*[C]=[C]),$(*[C]#[C]),$(*[C]#[N]);!$(*a)])]&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;Chloride_Aliphatic&#34;</span>: <span style="color:#e6db74">&#34;[Cl;$([Cl][*;$([#6]);!$(*=*)]);$([!$(*[C]=[C]);!$(*[C]#[C]);!$(*[C]#[N]);!$(*a)])]&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">&#34;PrimaryAlcohol_Aliphatic&#34;</span>: <span style="color:#e6db74">&#34;[O;H1;D1;$(O[C;D2,D1;!$(C[a])]);!$(OC=*);!$(OC#*)]&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this file:</p>
+<ul>
+<li>each key (e.g., &ldquo;AlkeneNonTerminal&rdquo;) is a human-readable label for the pattern.</li>
+<li>each value is a SMARTS string that represents the chemical substructure.</li>
+</ul>
+<h3 id="read-the-json-file-and-create-a-filtercatalog">Read the JSON file and create a <code>FilterCatalog</code></h3>
+<p>Now, let&rsquo;s create a custom <code>FilterCatalog</code> using RDKit. We&rsquo;ll read the JSON file and add each SMARTS pattern as a filter to the catalog.</p>
+<p>Here&rsquo;s how you can do this for the following example:</p>
+<p><img src="https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/_posts/assets/2024-09-30/molecule.png" alt="Molecule"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rdkit.Chem <span style="color:#f92672">import</span> FilterCatalog
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rdkit <span style="color:#f92672">import</span> Chem
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Load SMARTS patterns from the JSON file</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;chemical_patterns.json&#39;</span>, <span style="color:#e6db74">&#39;r&#39;</span>) <span style="color:#66d9ef">as</span> file:
+</span></span><span style="display:flex;"><span>    smarts_library <span style="color:#f92672">=</span> json<span style="color:#f92672">.</span>load(file)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create a custom FilterCatalog</span>
+</span></span><span style="display:flex;"><span>catalog <span style="color:#f92672">=</span> FilterCatalog<span style="color:#f92672">.</span>FilterCatalog()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add each SMARTS pattern to the catalog</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> pattern_name, smarts <span style="color:#f92672">in</span> smarts_library<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Create an RDKit molecule from the SMARTS pattern</span>
+</span></span><span style="display:flex;"><span>    mol <span style="color:#f92672">=</span> Chem<span style="color:#f92672">.</span>MolFromSmarts(smarts)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> mol <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">ValueError</span>(<span style="color:#e6db74">&#34;Invalid SMARTS pattern&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Create SMARTS matcher</span>
+</span></span><span style="display:flex;"><span>    sm <span style="color:#f92672">=</span> FilterCatalog<span style="color:#f92672">.</span>SmartsMatcher(mol)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Create a FilterCatalogEntry for each SMARTS pattern</span>
+</span></span><span style="display:flex;"><span>    entry <span style="color:#f92672">=</span> FilterCatalog<span style="color:#f92672">.</span>FilterCatalogEntry(pattern_name, sm)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add the entry to the FilterCatalog</span>
+</span></span><span style="display:flex;"><span>    catalog<span style="color:#f92672">.</span>AddEntry(entry)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Test with an example molecule</span>
+</span></span><span style="display:flex;"><span>mol <span style="color:#f92672">=</span> Chem<span style="color:#f92672">.</span>MolFromSmiles(<span style="color:#e6db74">&#34;C1C=CC=C(/C(/C(=O)NCCCl)=C\OC)C=1&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Extract keys for every match and create a sorted substructure fingerprint</span>
+</span></span><span style="display:flex;"><span>matches <span style="color:#f92672">=</span> catalog<span style="color:#f92672">.</span>GetMatches(mol)
+</span></span><span style="display:flex;"><span>matches_keys <span style="color:#f92672">=</span> [<span style="color:#66d9ef">match</span><span style="color:#f92672">.</span>GetDescription() <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">match</span> <span style="color:#f92672">in</span> matches]
+</span></span><span style="display:flex;"><span>matches_keys<span style="color:#f92672">.</span>sort()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># concatenate the substructure fingerprint</span>
+</span></span><span style="display:flex;"><span>substructure_fingerprint <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34; &#34;</span><span style="color:#f92672">.</span>join(matches_keys)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(substructure_fingerprint)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># SMILES: C1C=CC=C(/C(/C(=O)NCCCl)=C\OC)C=1</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Substructure fingerprint: AlkeneNonTerminal Amide Chloride_Aliphatic</span>
+</span></span></code></pre></div><p>Explanation:</p>
+<p>A. Loading SMARTS Patterns: The <code>json.load()</code> function is used to read the JSON file.</p>
+<p>B. Creating the FilterCatalog:</p>
+<ul>
+<li>An empty <code>FilterCatalog</code> object (catalog) is instantiated.</li>
+<li>For each entry in the <em>smarts_library</em>, a SMART matcher object is created and added together with its <em>pattern_name</em> to a <code>FilterCatalogEntry</code>.</li>
+<li>The entry is then added to the <code>FilterCatalog</code> via the <code>AddEntry</code> method of the catalog.</li>
+</ul>
+<p>C. Testing a Molecule:</p>
+<ul>
+<li>A sample molecule is created from a SMILES string using <code>Chem.MolFromSmiles()</code>.</li>
+<li>The <code>catalog.GetMatches(mol)</code> method checks if the molecule contains patterns defined in the custom filter catalog.</li>
+<li>Keys of the matches are extracted, sorted, and concatenated to obtain the final substructure fingerprint.</li>
+</ul>
+<p>Benefits of This Approach:</p>
+<ul>
+<li>Customizability: You can update the JSON file with new SMARTS patterns without modifying the core code. However, a new versions of the SMARTS library will result in updates in the data warehouse to keep your records up-to-date.</li>
+<li>Scalability: This approach scales well, allowing you to build extensive catalogs of chemical filters specific to the needs of different projects (FYI: I tested it for library sizes up to about 500 SMARTS patterns).</li>
+<li>Readability: Each SMARTS pattern is given a descriptive label, making it easy to understand and manage the chemical filters.</li>
+</ul>
+<h2 id="serializing-the-filtercatalog">Serializing the <code>FilterCatalog</code></h2>
+<p>After creating a custom <code>FilterCatalog</code>, it can be beneficial to serialize it for future use without having to recreate it from scratch each time. RDKit provides functionality for serializing and saving filter catalogs, allowing you to store them as binary files. This can be particularly useful when working with large catalogs or when needing to share filters across different projects. You can use Python&rsquo;s pickle module to serialize the FilterCatalog object:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pickle
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rdkit <span style="color:#f92672">import</span> Chem
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rdkit.Chem <span style="color:#f92672">import</span> FilterCatalog
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Load SMARTS patterns from the JSON file</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(<span style="color:#e6db74">&#39;chemical_patterns.json&#39;</span>, <span style="color:#e6db74">&#39;r&#39;</span>) <span style="color:#66d9ef">as</span> file:
+</span></span><span style="display:flex;"><span>    smarts_library <span style="color:#f92672">=</span> json<span style="color:#f92672">.</span>load(file)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create a custom FilterCatalog</span>
+</span></span><span style="display:flex;"><span>catalog <span style="color:#f92672">=</span> FilterCatalog<span style="color:#f92672">.</span>FilterCatalog()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add each SMARTS pattern to the catalog</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> pattern_name, smarts <span style="color:#f92672">in</span> smarts_library<span style="color:#f92672">.</span>items():
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Create an RDKit molecule from the SMARTS pattern</span>
+</span></span><span style="display:flex;"><span>    mol <span style="color:#f92672">=</span> Chem<span style="color:#f92672">.</span>MolFromSmarts(smarts)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> mol <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">ValueError</span>(<span style="color:#e6db74">&#34;Invalid SMARTS pattern&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Create SMARTS matcher</span>
+</span></span><span style="display:flex;"><span>    sm <span style="color:#f92672">=</span> FilterCatalog<span style="color:#f92672">.</span>SmartsMatcher(mol)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Create a FilterCatalogEntry for each SMARTS pattern</span>
+</span></span><span style="display:flex;"><span>    entry <span style="color:#f92672">=</span> FilterCatalog<span style="color:#f92672">.</span>FilterCatalogEntry(pattern_name, sm)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add the entry to the FilterCatalog</span>
+</span></span><span style="display:flex;"><span>    catalog<span style="color:#f92672">.</span>AddEntry(entry)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Serialize FilterCatalog</span>
+</span></span><span style="display:flex;"><span>data <span style="color:#f92672">=</span> pickle<span style="color:#f92672">.</span>dumps(catalog<span style="color:#f92672">.</span>Serialize())
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">with</span> open(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(os<span style="color:#f92672">.</span>getcwd(), <span style="color:#e6db74">&#34;filter_catalog.pkl&#34;</span>), <span style="color:#e6db74">&#34;wb&#34;</span>) <span style="color:#66d9ef">as</span> write_file:
+</span></span><span style="display:flex;"><span>    write_file<span style="color:#f92672">.</span>write(data)
+</span></span></code></pre></div><h2 id="using-lru-cache-to-deserialize-the-filtercatalog">Using LRU cache to deserialize the <code>FilterCatalog</code></h2>
+<p>To manage the deserialization of a <code>FilterCatalog</code> efficiently, you can use Python&rsquo;s <code>functools.lru_cache</code> (<code>maxsize=1</code>). This allows you to keep the deserialized catalog in memory for rapid access, while automatically managing the cache size based on usage.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> pickle
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> functools <span style="color:#f92672">import</span> lru_cache
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> rdkit.Chem <span style="color:#f92672">import</span> FilterCatalog
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@lru_cache</span>(maxsize<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">load_filter_catalog</span>(binary_name: str <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>) <span style="color:#f92672">-&gt;</span> FilterCatalog<span style="color:#f92672">.</span>FilterCatalog:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Load RDKit SMARTS filter catalog for substructure search.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Returns:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    RDKit FilterCatalog for SMARTS substructure search.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> binary_name:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">FileNotFoundError</span>(<span style="color:#e6db74">&#34;Binary name is required to load the filter catalog.&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Load the serialized filter catalog in file context</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> open(binary_name, <span style="color:#e6db74">&#34;rb&#34;</span>) <span style="color:#66d9ef">as</span> binary:
+</span></span><span style="display:flex;"><span>        catalog <span style="color:#f92672">=</span> pickle<span style="color:#f92672">.</span>load(binary)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># deserialize the filter catalog</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> FilterCatalog<span style="color:#f92672">.</span>FilterCatalog(catalog)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Load the filter catalog using the helper function</span>
+</span></span><span style="display:flex;"><span>filter_catalog <span style="color:#f92672">=</span> load_filter_catalog(<span style="color:#e6db74">&#34;filter_catalog.pkl&#34;</span>)
+</span></span></code></pre></div><p>Explanation:</p>
+<p>A. LRU Cache Decorator:</p>
+<ul>
+<li>The <code>@lru_cache(maxsize=1)</code> decorator caches the <code>load_filter_catalog()</code> function, ensuring that the <code>FilterCatalog</code> is loaded from disk only once, after which it stays in memory.</li>
+<li>The <code>maxsize=1</code> parameter ensures that only the most recently used catalog is kept in memory, making this solution memory-efficient while still providing fast access.</li>
+</ul>
+<p>B. Loading the FilterCatalog:</p>
+<ul>
+<li>The function <code>load_filter_catalog</code> reads the serialized <code>FilterCatalog</code> from a binary file (<em>filter_catalog.pkl</em>) using pickle.</li>
+<li>Each time the function is called, if the cached version is already available, it returns it without reloading from the file.</li>
+</ul>
+<p>Benefits of Using LRU Cache:</p>
+<ul>
+<li>Efficient Access: Deserializing from disk can be time-consuming. Caching the <code>FilterCatalog</code> ensures efficient access without the repeated I/O operations.</li>
+<li>Memory Management: By limiting the cache size with <code>maxsize=1</code>, you avoid overloading memory, especially if dealing with multiple objects or a large dataset.</li>
+</ul>
+<h2 id="leveraging-custom-fingerprints-in-data-warehouses">Leveraging custom fingerprints in data warehouses</h2>
+<p>In this blog post, we explored how RDKit can be used to create customized chemical fingerprints for efficient molecule filtering. By building a <code>FilterCatalog</code> with custom SMARTS patterns, we can tailor the fingerprinting process to fit specific chemical features of interest. This is particularly valuable when we need to focus on specific substructures or chemical groups in a large dataset.</p>
+<p>We also saw how these custom fingerprints can be serialized for future use and cached in memory using an LRU cache, providing both scalability and efficiency in managing chemical data.</p>
+<p>One of the key advantages of creating simple, text-based fingerprints is their compatibility with data warehouses. In systems, where text-based queries are extremely efficient, storing fingerprints as text makes it straightforward to filter out or select molecules based on predefined criteria. This allows researchers to leverage the speed of exact text searches for scalable chemical screening.</p>
+<p>Using custom fingerprints in this way enables rapid retrieval of relevant molecules without complex and computationally costly substructure searches, making it an ideal solution for integrating cheminformatics into big data platforms. This approach ensures that the data warehouse maintains the performance required for large-scale chemical screening while providing the flexibility to refine and update chemical filters according to the evolving needs of a research project.</p>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			<nav class="nav tags">
+				<ul class="tags">
+					
+					<li><a href="/tags/chemistry">chemistry</a></li>
+					
+					<li><a href="/tags/data-engineering">data engineering</a></li>
+					
+					<li><a href="/tags/python">python</a></li>
+					
+				</ul>
+			</nav>
+			
+			
+		</div>
+		</article>
+</main>
+<footer>
+  <div style="display:flex"></div>
+  <div class="footer-info">
+    2024  <a
+      href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+  </div>
+</footer>
+</div>
+    </body>
+</html>

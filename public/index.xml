@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>f3rmion</title>
+    <link>http://localhost:1313/</link>
+    <description>Recent content on f3rmion</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 30 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Chemical Search in Data Warehouses</title>
+      <link>http://localhost:1313/posts/2024-09-30-substructure-fingerprints/</link>
+      <pubDate>Mon, 30 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024-09-30-substructure-fingerprints/</guid>
+      <description>&lt;p&gt;In the pharmaceutical industry, data is the foundation of innovation, enabling researchers to accelerate drug discovery, optimize synthesis processes, and predict biological activities. Among the various types of data, chemical information holds a critical role. However, handling large volumes of chemical data presents unique challenges, including scalability, searchability, and standardization. This is where data warehousing comes into play.&lt;/p&gt;&#xA;&lt;p&gt;Data warehousing is the practice of integrating and organizing data from diverse sources into a centralized, accessible repository. In the context of the pharmaceutical industry, data warehousing for chemical information means consolidating the structures, properties, and experimental results related to chemical compounds into a single, well-structured platform. By providing a unified view, it becomes easier to query, analyze, and retrieve data, which is crucial for tasks such as lead optimization, structure-activity relationship analysis, and intellectual property management.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Model Chemical Reactivity with Machine Learning</title>
+      <link>http://localhost:1313/posts/2024-02-24-minisci-reaction/</link>
+      <pubDate>Sat, 24 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024-02-24-minisci-reaction/</guid>
+      <description>&lt;p&gt;In this blog post, I would like to present how one can model chemical reactivity &lt;em&gt;via&lt;/em&gt; machine learning by exemplifying this for the prediction of regioselectivity determination in radical C-H functionalization of heteroaromatic systems.&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;implementation-and-training-set&#34;&gt;Implementation and training set&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://github.com/C-H-activation/minisci/tree/main&#34;&gt;GitHub repository&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;mentioned-dependencies&#34;&gt;Mentioned dependencies&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;code&gt;lazypredict&lt;/code&gt;: machine-learning screening library (Python)&lt;/li&gt;&#xA;&lt;li&gt;&lt;code&gt;GFN-xTB&lt;/code&gt;: semi-empirical tight-binding model (Fortran)&lt;/li&gt;&#xA;&lt;li&gt;&lt;code&gt;Morfeus&lt;/code&gt;: molecular featuriser for machine-learning (Python)&lt;/li&gt;&#xA;&lt;li&gt;&lt;code&gt;SHAP&lt;/code&gt; analysis: game theoretical analysis to check feature importance&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;prepare-the-stage&#34;&gt;Prepare the stage&lt;/h2&gt;&#xA;&lt;p&gt;The basic idea is to create a machine-learning model that enables us to predict where a radical will create a new bond within an aromatic system that contains a heteroatom (atom different than carbon).&#xA;Such a model is of great interest, since it could allow us to gain intuition and more insights into so far unknown territories and could speed up predictions for this kind of reaction.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
