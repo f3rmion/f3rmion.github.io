@@ -313,8 +313,6 @@ plt.savefig("xgb_shap_analysis.png", bbox_inches='tight', dpi=300)
 
 The generated figure is shown below, where each feature is represented by violin plots and the feature value is represented by gradient colors, where red represents a high feature value and blue a low one.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/assets/img/xgb_shap.png" alt="SHAP analysis" width="500"/>
-</p>
+![Shapley](https://raw.githubusercontent.com/f3rmion/f3rmion.github.io/refs/heads/main/assets/img/xgb_shap.png)
 
 The complete feature composition is shared in the [GitHub resource](https://github.com/C-H-activation/minisci/blob/main/minisci/helper/features.py).
